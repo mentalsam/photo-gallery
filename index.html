@@ -2,135 +2,14 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>画像マネージャー(5MBまで)</title>
-    <style>
-        /* 既存のスタイルはそのまま */
-    </style>
+    <title>画像管理サイト</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="header-container">
-        <h1>画像マネージャー</h1>
-        <div id="qr-code"></div>
-    </div>
-    
-    <div class="container">
-        <div class="controls">
-            <input type="file" id="image-input" accept="image/*" multiple>
-            <button id="add-button">画像を追加</button>
-        </div>
-        
-        <div class="image-container" id="image-container">
-            <div class="no-images">画像がありません。画像を追加してください。</div>
-        </div>
-    </div>
-
-    <!-- QRコード生成ライブラリ -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
-    <!-- Firebaseのライブラリ（名前空間形式） -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js"></script>
-
-    <script>
-        // Firebaseの設定
-        const firebaseConfig = {
-            apiKey: "AIzaSyCJqr2RDn6LTzPgIg_1PFvWUJeTHroJap4",
-            authDomain: "photo-gallery-d0f69.firebaseapp.com",
-            projectId: "photo-gallery-d0f69",
-            storageBucket: "photo-gallery-d0f69.appspot.com", // 修正済み
-            messagingSenderId: "799714552725",
-            appId: "1:799714552725:web:7cc6dd2f3f58d65a90a49c",
-            measurementId: "G-GLMTTWNQYE"
-        };
-
-        // Firebase初期化
-        try {
-            firebase.initializeApp(firebaseConfig);
-            console.log("Firebase initialized successfully");
-        } catch (error) {
-            console.error("Firebaseの初期化に失敗しました:", error);
-            alert("Firebaseの初期化に失敗しました。設定を確認してください。");
-            throw error;
-        }
-
-        // Storageの初期化
-        const storage = firebase.storage();
-        const imageInput = document.getElementById('image-input');
-        const imageContainer = document.getElementById('image-container');
-
-        // 画像アップロード処理
-        imageInput.addEventListener('change', function(event) {
-            const files = event.target.files;
-            Array.from(files).forEach(file => {
-                if (file.size > 5 * 1024 * 1024) {
-                    alert(`${file.name} が5MBを超えています。`);
-                    return;
-                }
-                const ref = storage.ref('images/' + Date.now() + '_' + file.name);
-                ref.put(file).then(snapshot => {
-                    snapshot.ref.getDownloadURL().then(url => {
-                        addImageToContainer({ url, name: file.name, filename: snapshot.metadata.name });
-                    }).catch(error => {
-                        console.error("Failed to get download URL:", error);
-                        alert(`${file.name} のアップロードに失敗しました。`);
-                    });
-                }).catch(error => {
-                    console.error("Upload failed:", error);
-                    alert(`${file.name} のアップロードに失敗しました。");
-                });
-            });
-        });
-
-        // 画像表示関数
-        function addImageToContainer(imageData) {
-            const noImages = imageContainer.querySelector('.no-images');
-            if (noImages) noImages.remove();
-
-            const imageItem = document.createElement('div');
-            imageItem.className = 'image-item';
-            imageItem.innerHTML = `
-                <img src="${imageData.url}" alt="${imageData.name}">
-                <div class="image-actions">
-                    <button class="download">ダウンロード</button>
-                    <button class="remove">削除</button>
-                </div>
-            `;
-            imageContainer.insertBefore(imageItem, imageContainer.firstChild);
-
-            imageItem.querySelector('.download').addEventListener('click', () => {
-                const link = document.createElement('a');
-                link.href = imageData.url;
-                link.download = imageData.name;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            });
-
-            imageItem.querySelector('.remove').addEventListener('click', () => {
-                storage.ref('images/' + imageData.filename).delete().then(() => {
-                    imageItem.remove();
-                    if (!imageContainer.children.length) {
-                        imageContainer.innerHTML = '<div class="no-images">画像がありません。画像を追加してください。</div>';
-                    }
-                }).catch(error => {
-                    console.error("Delete failed:", error);
-                    alert("画像の削除に失敗しました。");
-                });
-            });
-        }
-
-        // 「画像を追加」ボタン
-        document.getElementById('add-button').addEventListener('click', () => {
-            imageInput.click();
-        });
-
-        // QRコード生成
-        new QRCode(document.getElementById("qr-code"), {
-            text: window.location.href,
-            width: 100,
-            height: 100
-        });
-    </script>
+    <h1>画像管理サイト</h1>
+    <input type="file" id="imageInput" accept="image/*">
+    <div id="imageContainer" class="image-container"></div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
