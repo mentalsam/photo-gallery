@@ -1,34 +1,24 @@
 const imageInput = document.getElementById('imageInput');
 const imageContainer = document.getElementById('imageContainer');
 
-const CLOUD_NAME = 'dbcqnzlvc'; // Cloudinaryダッシュボードから正確にコピー
-const UPLOAD_PRESET = 'mentalsam'; // Upload Presetsで作成した名前を確認
+const CLOUD_NAME = 'dbcqnzlvc';
+const UPLOAD_PRESET = 'mentalsam';
 
 let images = JSON.parse(localStorage.getItem('uploadedImages')) || [];
 
 displayImages();
 
 imageInput.addEventListener('change', async function(e) {
-    // ファイルが選択されたか確認
-    if (!e.target.files || e.target.files.length === 0) {
-        alert('ファイルが選択されていません');
-        return;
-    }
-
     const file = e.target.files[0];
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', UPLOAD_PRESET);
 
     try {
-        console.log('アップロード開始:', file.name);
         const response = await axios.post(
             `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-            formData,
-            { timeout: 15000 } // 15秒タイムアウト
+            formData
         );
-        console.log('アップロード成功:', response.data.secure_url);
-
         const imageData = {
             url: response.data.secure_url,
             publicId: response.data.public_id,
@@ -37,16 +27,10 @@ imageInput.addEventListener('change', async function(e) {
         images.push(imageData);
         localStorage.setItem('uploadedImages', JSON.stringify(images));
         displayImages();
-        imageInput.value = ''; // 入力リセット
+        imageInput.value = '';
     } catch (error) {
         console.error('アップロードエラー:', error);
-        let errorMsg = 'アップロードに失敗しました。';
-        if (error.response) {
-            errorMsg += `\nエラー: ${error.response.data.error.message}`;
-        } else {
-            errorMsg += `\n詳細: ${error.message}`;
-        }
-        alert(errorMsg);
+        alert('アップロードに失敗しました。ネットワークを確認してください。');
     }
 });
 
