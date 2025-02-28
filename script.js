@@ -1,13 +1,17 @@
 const imageInput = document.getElementById('imageInput');
 const imageContainer = document.getElementById('imageContainer');
 
-const CLOUD_NAME = 'dbcqnzlvc'; // ダッシュボードからコピー
+// Cloudinaryの設定
+const CLOUD_NAME = 'dbcqnzlvc'; // ダッシュボードからコピーした値
 const UPLOAD_PRESET = 'mentalsam'; // Upload Presetsで作成したプリセット名
 
+// ローカルストレージから画像一覧を取得（簡易永続化）
 let images = JSON.parse(localStorage.getItem('uploadedImages')) || [];
 
+// 初期表示
 displayImages();
 
+// 画像アップロード
 imageInput.addEventListener('change', async function(e) {
     const file = e.target.files[0];
     const formData = new FormData();
@@ -30,9 +34,10 @@ imageInput.addEventListener('change', async function(e) {
         imageInput.value = '';
     } catch (error) {
         console.error('アップロードエラー:', error);
-        alert('アップロードに失敗しました。');
     }
 });
+
+// 以下は画像表示、削除、ダウンロードの関数（省略）
 
 function displayImages() {
     imageContainer.innerHTML = '';
