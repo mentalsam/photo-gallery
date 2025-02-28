@@ -1,40 +1,26 @@
 const imageInput = document.getElementById('imageInput');
 const imageContainer = document.getElementById('imageContainer');
 
-const CLOUD_NAME = 'dbcqnzlvc'; 
-const UPLOAD_PRESET = 'mentalsam';
-
-let images = JSON.parse(localStorage.getItem('uploadedImages')) || [];
-
-displayImages();
-
 imageInput.addEventListener('change', async function(e) {
     const file = e.target.files[0];
     if (!file) return;
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('upload_preset', UPLOAD_PRESET);
 
     try {
-        const response = await axios.post(
-            `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-            formData
-        );
+        const response = await fetch('http://localhost:5000/upload', {
+            method: 'POST',
+            body: formData
+        });
 
-        if (!response.data || !response.data.secure_url) {
-            throw new Error('アップロードレスポンスが不正です');
+        const data = await response.json();
+
+        if (!data || !data.secure_url) {
+            throw new Error('アップロードに失敗しました');
         }
 
-        const imageData = {
-            url: response.data.secure_url,
-            publicId: response.data.public_id,
-            filename: file.name
-        };
-
-        images.push(imageData);
-        localStorage.setItem('uploadedImages', JSON.stringify(images));
-        displayImages();
+        displayImage(data.secure_url, file.name);
         imageInput.value = '';
 
     } catch (error) {
@@ -43,56 +29,25 @@ imageInput.addEventListener('change', async function(e) {
     }
 });
 
-function displayImages() {
-    imageContainer.innerHTML = '';
-    
-    if (images.length === 0) {
-        const message = document.createElement('p');
-        message.textContent = '画像がありません。画像を追加してください。';
-        imageContainer.appendChild(message);
-        return;
-    }
+function displayImage(url, filename) {
+    const div = document.createElement('div');
+    div.className = 'image-item';
 
-    images.forEach((image, index) => {
-        if (!image || !image.url) return;
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = filename || '画像';
 
-        const div = document.createElement('div');
-        div.className = 'image-item';
+    const downloadBtn = document.createElement('button');
+    downloadBtn.textContent = 'ダウンロード';
+    downloadBtn.className = 'download-btn';
+    downloadBtn.onclick = () => downloadImage(url, filename);
 
-        const img = document.createElement('img');
-        img.src = image.url;
-        img.alt = image.filename || '画像';
-        img.onerror = () => {
-            img.src = 'データを読み込めませんでした';
-        };
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = '削除';
-        deleteBtn.className = 'delete-btn';
-        deleteBtn.onclick = () => deleteImage(index);
-
-        const downloadBtn = document.createElement('button');
-        downloadBtn.textContent = 'ダウンロード';
-        downloadBtn.className = 'download-btn';
-        downloadBtn.onclick = () => downloadImage(image.url, image.filename);
-
-        div.appendChild(img);
-        div.appendChild(deleteBtn);
-        div.appendChild(downloadBtn);
-        imageContainer.appendChild(div);
-    });
-}
-
-function deleteImage(index) {
-    if (index >= 0 && index < images.length) {
-        images.splice(index, 1);
-        localStorage.setItem('uploadedImages', JSON.stringify(images));
-        displayImages();
-    }
+    div.appendChild(img);
+    div.appendChild(downloadBtn);
+    imageContainer.appendChild(div);
 }
 
 function downloadImage(url, filename) {
-    if (!url) return;
     const link = document.createElement('a');
     link.href = url;
     link.download = filename;
