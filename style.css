@@ -3,11 +3,14 @@ body {
     max-width: 800px;
     margin: 0 auto;
     padding: 15px;
+    background-color: #f5f5f5;
 }
 
 h1 {
     font-size: 24px;
     text-align: center;
+    color: #333;
+    margin-bottom: 20px;
 }
 
 input[type="file"] {
@@ -15,6 +18,7 @@ input[type="file"] {
     margin: 10px auto;
     width: 100%;
     max-width: 300px;
+    padding: 10px;
 }
 
 .image-container {
@@ -29,29 +33,40 @@ input[type="file"] {
     position: relative;
     width: 100%;
     max-width: 200px;
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .image-item img {
     width: 100%;
-    height: auto;
+    height: 150px;
+    object-fit: cover;
     border-radius: 5px;
+    margin-bottom: 10px;
 }
 
 .delete-btn {
     position: absolute;
     top: 5px;
     right: 5px;
-    background: red;
+    background: #dc3545;
     color: white;
     border: none;
-    padding: 8px;
+    padding: 5px 10px;
     cursor: pointer;
     border-radius: 3px;
     font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.delete-btn:hover {
+    background: #c82333;
 }
 
 .download-btn {
-    margin-top: 5px;
+    display: block;
     width: 100%;
     padding: 8px;
     cursor: pointer;
@@ -60,12 +75,22 @@ input[type="file"] {
     border: none;
     border-radius: 3px;
     font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.download-btn:hover {
+    background: #0056b3;
 }
 
 /* スマホ対応（画面幅が600px以下の場合） */
 @media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
     h1 {
         font-size: 20px;
+        margin-bottom: 15px;
     }
 
     .image-container {
@@ -86,5 +111,6 @@ input[type="file"] {
 
     input[type="file"] {
         width: 90%;
+        padding: 8px;
     }
 }
