@@ -16,6 +16,14 @@
             color: #333;
             text-align: center;
             margin-bottom: 30px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .header-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
         }
         .container {
             display: flex;
@@ -87,10 +95,17 @@
             border-radius: 8px;
             color: #666;
         }
+        #qr-code {
+            display: inline-block;
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
-    <h1>画像マネージャー</h1>
+    <div class="header-container">
+        <h1>画像マネージャー</h1>
+        <div id="qr-code"></div>
+    </div>
     
     <div class="container">
         <div class="controls">
@@ -103,6 +118,8 @@
         </div>
     </div>
 
+    <!-- QRコード生成ライブラリを追加 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
 document.addEventListener('DOMContentLoaded', function() {
     const imageInput = document.getElementById('image-input');
@@ -144,6 +161,18 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         this.value = '';
+    });
+
+    // QRコード生成
+    const qrCodeDiv = document.getElementById('qr-code');
+    const currentUrl = window.location.href || 'https://example.com'; // デフォルトURL（実際の環境では現在のURLが使用されます）
+    new QRCode(qrCodeDiv, {
+        text: currentUrl,
+        width: 100,
+        height: 100,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
     });
 
     // 画像をコンテナに追加する関数
