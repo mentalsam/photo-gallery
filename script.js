@@ -1,15 +1,13 @@
 const imageInput = document.getElementById('imageInput');
 const imageContainer = document.getElementById('imageContainer');
-const CLOUD_NAME = 'dbcqnzlvc';
-const UPLOAD_PRESET = 'mentalsam'; // Cloudinaryダッシュボードで作成
 
-// ローカルストレージから画像一覧を取得（簡易永続化）
+const CLOUD_NAME = 'あなたのCloud Name'; // ダッシュボードからコピー
+const UPLOAD_PRESET = 'unsigned_upload'; // Upload Presetsで作成したプリセット名
+
 let images = JSON.parse(localStorage.getItem('uploadedImages')) || [];
 
-// 初期表示
 displayImages();
 
-// 画像アップロード
 imageInput.addEventListener('change', async function(e) {
     const file = e.target.files[0];
     const formData = new FormData();
@@ -32,10 +30,10 @@ imageInput.addEventListener('change', async function(e) {
         imageInput.value = '';
     } catch (error) {
         console.error('アップロードエラー:', error);
+        alert('アップロードに失敗しました。');
     }
 });
 
-// 画像表示
 function displayImages() {
     imageContainer.innerHTML = '';
     images.forEach((image, index) => {
@@ -44,6 +42,7 @@ function displayImages() {
 
         const img = document.createElement('img');
         img.src = image.url;
+        img.alt = image.filename;
 
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = '削除';
@@ -62,14 +61,12 @@ function displayImages() {
     });
 }
 
-// 画像削除
 function deleteImage(index) {
     images.splice(index, 1);
     localStorage.setItem('uploadedImages', JSON.stringify(images));
     displayImages();
 }
 
-// 画像ダウンロード
 function downloadImage(url, filename) {
     const link = document.createElement('a');
     link.href = url;
