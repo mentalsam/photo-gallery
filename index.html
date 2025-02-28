@@ -33,14 +33,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js"></script>
 
     <script>
-        // Firebaseの設定
+        // Firebaseの設定を直接記述
         const firebaseConfig = {
-            apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-            authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-            projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-            storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-            messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-            appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+            apiKey: "AIzaSyCJqr2RDn6LTzPgIg_1PFvWUJeTHroJap4",
+            authDomain: "photo-gallery-d0f69.firebaseapp.com",
+            projectId: "photo-gallery-d0f69",
+            storageBucket: "photo-gallery-d0f69.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
         try {
@@ -68,7 +68,13 @@
                 ref.put(file).then(snapshot => {
                     snapshot.ref.getDownloadURL().then(url => {
                         addImageToContainer({ url, name: file.name, filename: snapshot.metadata.name });
+                    }).catch(error => {
+                        console.error("ダウンロードURLの取得に失敗しました:", error);
+                        alert("画像のアップロードに失敗しました。");
                     });
+                }).catch(error => {
+                    console.error("画像のアップロードに失敗しました:", error);
+                    alert("画像のアップロードに失敗しました。");
                 });
             }
         });
@@ -104,6 +110,9 @@
                     if (!imageContainer.children.length) {
                         imageContainer.innerHTML = '<div class="no-images">画像がありません。画像を追加してください。</div>';
                     }
+                }).catch(error => {
+                    console.error("画像の削除に失敗しました:", error);
+                    alert("画像の削除に失敗しました。");
                 });
             });
         }
