@@ -1,6 +1,6 @@
 const imageInput = document.getElementById('imageInput');
 const imageContainer = document.getElementById('imageContainer');
-const CLOUD_NAME = 'あなたのCloudinary Cloud Name';
+const CLOUD_NAME = 'dbcqnzlvc';
 const UPLOAD_PRESET = '署名なしアップロード用のプリセット'; // Cloudinaryダッシュボードで作成
 
 // ローカルストレージから画像一覧を取得（簡易永続化）
