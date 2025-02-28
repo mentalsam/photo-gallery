@@ -1,8 +1,8 @@
 const imageInput = document.getElementById('imageInput');
 const imageContainer = document.getElementById('imageContainer');
 
-const CLOUD_NAME = 'dbcqnzlvc';
-const UPLOAD_PRESET = 'mentalsam';
+const CLOUD_NAME = 'dbcqnzlvc'; // ダッシュボードからコピー
+const UPLOAD_PRESET = 'mentalsam'; // Upload Presetsで作成したプリセット名
 
 let images = JSON.parse(localStorage.getItem('uploadedImages')) || [];
 
@@ -30,7 +30,7 @@ imageInput.addEventListener('change', async function(e) {
         imageInput.value = '';
     } catch (error) {
         console.error('アップロードエラー:', error);
-        alert('アップロードに失敗しました。ネットワークを確認してください。');
+        alert('アップロードに失敗しました。');
     }
 });
 
