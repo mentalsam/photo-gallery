@@ -104,99 +104,118 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const imageInput = document.getElementById('image-input');
-            const addButton = document.getElementById('add-button');
-            const imageContainer = document.getElementById('image-container');
-            
-            // 画像追加ボタンのイベントリスナー
-            addButton.addEventListener('click', function() {
-                imageInput.click();
-            });
-            
-            // ファイル選択時のイベントリスナー
-            imageInput.addEventListener('change', function(event) {
-                const files = event.target.files;
-                
-                if (files.length > 0) {
-                    // "画像がありません" メッセージを削除
-                    const noImages = document.querySelector('.no-images');
-                    if (noImages) {
-                        noImages.remove();
-                    }
-                    
-                    // 選択された各ファイルを処理
-                    for (let i = 0; i < files.length; i++) {
-                        const file = files[i];
-                        
-                        // 画像ファイルかチェック
-                        if (!file.type.match('image.*')) {
-                            continue;
-                        }
-                        
-                        const reader = new FileReader();
-                        
-                        reader.onload = function(e) {
-                            // 画像要素を作成
-                            const imageItem = document.createElement('div');
-                            imageItem.className = 'image-item';
-                            
-                            const img = document.createElement('img');
-                            img.src = e.target.result;
-                            img.alt = file.name;
-                            img.title = file.name;
-                            
-                            const imageActions = document.createElement('div');
-                            imageActions.className = 'image-actions';
-                            
-                            // 削除ボタンを作成
-                            const removeButton = document.createElement('button');
-                            removeButton.className = 'remove';
-                            removeButton.textContent = '削除';
-                            removeButton.addEventListener('click', function() {
-                                imageItem.remove();
-                                
-                                // 画像がなくなったら "画像がありません" メッセージを表示
-                                if (imageContainer.children.length === 0) {
-                                    const noImagesDiv = document.createElement('div');
-                                    noImagesDiv.className = 'no-images';
-                                    noImagesDiv.textContent = '画像がありません。画像を追加してください。';
-                                    imageContainer.appendChild(noImagesDiv);
-                                }
-                            });
-                            
-                            // ダウンロードボタンを作成
-                            const downloadButton = document.createElement('button');
-                            downloadButton.className = 'download';
-                            downloadButton.textContent = 'ダウンロード';
-                            downloadButton.addEventListener('click', function() {
-                                const link = document.createElement('a');
-                                link.href = e.target.result;
-                                link.download = file.name;
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                            });
-                            
-                            // 要素を組み立て
-                            imageActions.appendChild(downloadButton);
-                            imageActions.appendChild(removeButton);
-                            
-                            imageItem.appendChild(img);
-                            imageItem.appendChild(imageActions);
-                            
-                            imageContainer.appendChild(imageItem);
-                        };
-                        
-                        // ファイルを読み込み
-                        reader.readAsDataURL(file);
-                    }
-                }
-                
-                // 入力をリセット（同じファイルを再度選択できるように）
-                this.value = '';
-            });
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.getElementById('image-input');
+    const addButton = document.getElementById('add-button');
+    const imageContainer = document.getElementById('image-container');
+
+    // 保存済みの画像を読み込んで表示
+    loadImagesFromLocalStorage();
+
+    // 画像追加ボタンのイベントリスナー
+    addButton.addEventListener('click', function() {
+        imageInput.click();
+    });
+
+    // ファイル選択時のイベントリスナー
+    imageInput.addEventListener('change', function(event) {
+        const files = event.target.files;
+
+        if (files.length > 0) {
+            const noImages = document.querySelector('.no-images');
+            if (noImages) noImages.remove();
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (!file.type.match('image.*')) continue;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imageData = {
+                        src: e.target.result,
+                        name: file.name
+                    };
+                    addImageToContainer(imageData);
+
+                    // ローカルストレージに保存
+                    saveImageToLocalStorage(imageData);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        this.value = '';
+    });
+
+    // 画像をコンテナに追加する関数
+    function addImageToContainer(imageData) {
+        const imageItem = document.createElement('div');
+        imageItem.className = 'image-item';
+
+        const img = document.createElement('img');
+        img.src = imageData.src;
+        img.alt = imageData.name;
+        img.title = imageData.name;
+
+        const imageActions = document.createElement('div');
+        imageActions.className = 'image-actions';
+
+        const removeButton = document.createElement('button');
+        removeButton.className = 'remove';
+        removeButton.textContent = '削除';
+        removeButton.addEventListener('click', function() {
+            imageItem.remove();
+            removeImageFromLocalStorage(imageData.src);
+            if (imageContainer.children.length === 0) {
+                const noImagesDiv = document.createElement('div');
+                noImagesDiv.className = 'no-images';
+                noImagesDiv.textContent = '画像がありません。画像を追加してください。';
+                imageContainer.appendChild(noImagesDiv);
+            }
         });
+
+        const downloadButton = document.createElement('button');
+        downloadButton.className = 'download';
+        downloadButton.textContent = 'ダウンロード';
+        downloadButton.addEventListener('click', function() {
+            const link = document.createElement('a');
+            link.href = imageData.src;
+            link.download = imageData.name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        imageActions.appendChild(downloadButton);
+        imageActions.appendChild(removeButton);
+        imageItem.appendChild(img);
+        imageItem.appendChild(imageActions);
+        imageContainer.appendChild(imageItem);
+    }
+
+    // ローカルストレージに画像を保存
+    function saveImageToLocalStorage(imageData) {
+        let images = JSON.parse(localStorage.getItem('images') || '[]');
+        images.push(imageData);
+        localStorage.setItem('images', JSON.stringify(images));
+    }
+
+    // ローカルストレージから画像を読み込み
+    function loadImagesFromLocalStorage() {
+        const images = JSON.parse(localStorage.getItem('images') || '[]');
+        if (images.length > 0) {
+            const noImages = document.querySelector('.no-images');
+            if (noImages) noImages.remove();
+            images.forEach(imageData => addImageToContainer(imageData));
+        }
+    }
+
+    // ローカルストレージから画像を削除
+    function removeImageFromLocalStorage(src) {
+        let images = JSON.parse(localStorage.getItem('images') || '[]');
+        images = images.filter(img => img.src !== src);
+        localStorage.setItem('images', JSON.stringify(images));
+    }
+});
     </script>
 </body>
 </html>
