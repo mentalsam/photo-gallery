@@ -36,9 +36,9 @@
         // Firebaseの設定（実際の値に置き換えてください）
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
+            authDomain: "photo-gallery-d0f69.firebaseapp.com",
+            projectId: "photo-gallery-d0f69",
+            storageBucket: "photo-gallery-d0f69.appspot.com",
             messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
             appId: "YOUR_APP_ID"
         };
@@ -48,7 +48,7 @@
             firebase.initializeApp(firebaseConfig);
             console.log("Firebase initialized successfully");
         } catch (error) {
-            console.error("Firebase initialization failed:", error);
+            console.error("Firebaseの初期化に失敗しました:", error);
             alert("Firebaseの初期化に失敗しました。設定を確認してください。");
             throw error;
         }
