@@ -8,24 +8,27 @@ body {
 h1 {
     font-size: 20px;
     text-align: center;
+    margin: 10px 0;
 }
 
 input[type="file"] {
-    width: 90%;
-    margin: 10px auto;
     display: block;
-    padding: 10px;
-    font-size: 16px;
+    margin: 10px auto;
+    width: 90%;
+    max-width: 300px;
 }
 
 .image-container {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
+    max-height: 80vh;
+    overflow-y: auto;
     padding: 10px;
 }
 
 .image-item {
+    position: relative;
     width: 100%;
     max-width: 300px;
     margin: 0 auto;
@@ -38,22 +41,37 @@ input[type="file"] {
 }
 
 .delete-btn, .download-btn {
-    display: block;
-    width: 100%;
-    margin: 5px 0;
     padding: 10px;
-    font-size: 16px;
     border: none;
     border-radius: 5px;
     color: white;
     cursor: pointer;
+    min-height: 40px;
+    min-width: 80px;
+    font-size: 16px;
     touch-action: manipulation;
 }
 
 .delete-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
     background: red;
 }
 
 .download-btn {
+    margin-top: 5px;
+    width: 100%;
     background: #007bff;
+}
+
+@media (min-width: 600px) {
+    .image-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .image-item {
+        max-width: 200px;
+    }
 }
