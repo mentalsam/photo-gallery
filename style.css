@@ -13,12 +13,48 @@ h1 {
     margin-bottom: 20px;
 }
 
+.upload-container {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.upload-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.upload-button:hover {
+    background-color: #45a049;
+}
+
 input[type="file"] {
-    display: block;
-    margin: 10px auto;
-    width: 100%;
-    max-width: 300px;
-    padding: 10px;
+    display: none;
+}
+
+.loading {
+    display: none;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border-left-color: #007bff;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .image-container {
@@ -45,6 +81,20 @@ input[type="file"] {
     object-fit: cover;
     border-radius: 5px;
     margin-bottom: 10px;
+}
+
+.filename {
+    margin: 5px 0;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.timestamp {
+    margin: 0 0 10px;
+    font-size: 12px;
+    color: #666;
 }
 
 .delete-btn {
@@ -74,43 +124,3 @@ input[type="file"] {
     color: white;
     border: none;
     border-radius: 3px;
-    font-size: 14px;
-    transition: background-color 0.3s;
-}
-
-.download-btn:hover {
-    background: #0056b3;
-}
-
-/* スマホ対応（画面幅が600px以下の場合） */
-@media (max-width: 600px) {
-    body {
-        padding: 10px;
-    }
-
-    h1 {
-        font-size: 20px;
-        margin-bottom: 15px;
-    }
-
-    .image-container {
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-    }
-
-    .image-item {
-        max-width: 100%;
-        width: 90%;
-    }
-
-    .delete-btn, .download-btn {
-        padding: 10px;
-        font-size: 16px;
-    }
-
-    input[type="file"] {
-        width: 90%;
-        padding: 8px;
-    }
-}
