@@ -1,57 +1,116 @@
 const imageInput = document.getElementById('imageInput');
 const imageContainer = document.getElementById('imageContainer');
 
+const CLOUD_NAME = 'dbcqnzlvc'; 
+const UPLOAD_PRESET = 'mentalsam';
+
+let images = JSON.parse(localStorage.getItem('uploadedImages')) || [];
+
+displayImages();
+
 imageInput.addEventListener('change', async function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
-    const formData = new FormData();
-    formData.append('file', file);
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', UPLOAD_PRESET);
 
-    try {
-        const response = await fetch('http://localhost:5000/upload', {
-            method: 'POST',
-            body: formData
-        });
+        try {
+            const response = await axios.post(
+                `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+                formData
+            );
 
-        const data = await response.json();
+            if (!response.data || !response.data.secure_url) {
+                throw new Error('アップロードレスポンスが不正です');
+            }
 
-        if (!data || !data.secure_url) {
-            throw new Error('アップロードに失敗しました');
+            const imageData = {
+                url: response.data.secure_url,
+                publicId: response.data.public_id,
+                filename: file.name
+            };
+
+            images.push(imageData);
+            localStorage.setItem('uploadedImages', JSON.stringify(images));
+            
+        } catch (error) {
+            console.error('アップロードエラー:', error);
+            alert(`"${file.name}" のアップロードに失敗しました。もう一度お試しください。`);
         }
-
-        displayImage(data.secure_url, file.name);
-        imageInput.value = '';
-
-    } catch (error) {
-        console.error('アップロードエラー:', error);
-        alert('アップロードに失敗しました。もう一度お試しください。');
     }
+    
+    displayImages();
+    imageInput.value = '';
 });
 
-function displayImage(url, filename) {
-    const div = document.createElement('div');
-    div.className = 'image-item';
+function displayImages() {
+    imageContainer.innerHTML = '';
+    
+    if (images.length === 0) {
+        const message = document.createElement('p');
+        message.textContent = '画像がありません。画像を追加してください。';
+        imageContainer.appendChild(message);
+        return;
+    }
 
-    const img = document.createElement('img');
-    img.src = url;
-    img.alt = filename || '画像';
+    images.forEach((image, index) => {
+        if (!image || !image.url) return;
 
-    const downloadBtn = document.createElement('button');
-    downloadBtn.textContent = 'ダウンロード';
-    downloadBtn.className = 'download-btn';
-    downloadBtn.onclick = () => downloadImage(url, filename);
+        const div = document.createElement('div');
+        div.className = 'image-item';
 
-    div.appendChild(img);
-    div.appendChild(downloadBtn);
-    imageContainer.appendChild(div);
+        const img = document.createElement('img');
+        img.src = image.url;
+        img.alt = image.filename || '画像';
+        img.onerror = () => {
+            img.src = 'https://via.placeholder.com/150?text=Error';
+        };
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = '削除';
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.onclick = () => deleteImage(index);
+
+        const downloadBtn = document.createElement('button');
+        downloadBtn.textContent = 'ダウンロード';
+        downloadBtn.className = 'download-btn';
+        downloadBtn.onclick = () => downloadImage(image.url, image.filename || 'downloaded-image.jpg');
+
+        div.appendChild(img);
+        div.appendChild(deleteBtn);
+        div.appendChild(downloadBtn);
+        imageContainer.appendChild(div);
+    });
+}
+
+function deleteImage(index) {
+    if (index >= 0 && index < images.length) {
+        images.splice(index, 1);
+        localStorage.setItem('uploadedImages', JSON.stringify(images));
+        displayImages();
+    }
 }
 
 function downloadImage(url, filename) {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (!url) return;
+    
+    fetch(url)
+        .then(response => response.blob())
+        .then(blob => {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+        })
+        .catch(error => {
+            console.error('ダウンロードエラー:', error);
+            alert('ダウンロードに失敗しました。もう一度お試しください。');
+        });
 }
