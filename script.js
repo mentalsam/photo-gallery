@@ -1,41 +1,39 @@
 const imageInput = document.getElementById('imageInput');
 const imageContainer = document.getElementById('imageContainer');
+const loadingIndicator = document.getElementById('loading');
 
 const CLOUD_NAME = 'dbcqnzlvc'; 
 const UPLOAD_PRESET = 'mentalsam';
 
-let images = JSON.parse(localStorage.getItem('uploadedImages')) || [];
+let images = [];
 
-displayImages();
+// 初期ロード時に画像リストを取得
+loadImages();
 
+// 画像アップロードイベント
 imageInput.addEventListener('change', async function(e) {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+
+    // ロード中表示
+    showLoading(true);
 
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('upload_preset', UPLOAD_PRESET);
 
         try {
-            const response = await axios.post(
-                `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-                formData
-            );
+            // サーバーAPIを使用してアップロード
+            const response = await axios.post('/api/upload', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
 
             if (!response.data || !response.data.secure_url) {
                 throw new Error('アップロードレスポンスが不正です');
             }
-
-            const imageData = {
-                url: response.data.secure_url,
-                publicId: response.data.public_id,
-                filename: file.name
-            };
-
-            images.push(imageData);
-            localStorage.setItem('uploadedImages', JSON.stringify(images));
             
         } catch (error) {
             console.error('アップロードエラー:', error);
@@ -43,10 +41,28 @@ imageInput.addEventListener('change', async function(e) {
         }
     }
     
-    displayImages();
+    // アップロード完了後に画像リストを再取得
+    await loadImages();
     imageInput.value = '';
+    showLoading(false);
 });
 
+// サーバーから画像リストを取得
+async function loadImages() {
+    try {
+        showLoading(true);
+        const response = await axios.get('/api/images');
+        images = response.data;
+        displayImages();
+    } catch (error) {
+        console.error('画像データ取得エラー:', error);
+        alert('画像データの取得に失敗しました。ページを更新してください。');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// 画像の表示処理
 function displayImages() {
     imageContainer.innerHTML = '';
     
@@ -70,6 +86,14 @@ function displayImages() {
             img.src = 'https://via.placeholder.com/150?text=Error';
         };
 
+        const filename = document.createElement('p');
+        filename.className = 'filename';
+        filename.textContent = image.filename || 'Unnamed';
+        
+        const timestamp = document.createElement('p');
+        timestamp.className = 'timestamp';
+        timestamp.textContent = image.uploadedAt ? new Date(image.uploadedAt).toLocaleString() : '';
+
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = '削除';
         deleteBtn.className = 'delete-btn';
@@ -81,20 +105,30 @@ function displayImages() {
         downloadBtn.onclick = () => downloadImage(image.url, image.filename || 'downloaded-image.jpg');
 
         div.appendChild(img);
+        div.appendChild(filename);
+        div.appendChild(timestamp);
         div.appendChild(deleteBtn);
         div.appendChild(downloadBtn);
         imageContainer.appendChild(div);
     });
 }
 
-function deleteImage(index) {
+// 画像削除処理
+async function deleteImage(index) {
     if (index >= 0 && index < images.length) {
-        images.splice(index, 1);
-        localStorage.setItem('uploadedImages', JSON.stringify(images));
-        displayImages();
+        try {
+            showLoading(true);
+            await axios.delete(`/api/images/${index}`);
+            await loadImages(); // 画像リストを再取得
+        } catch (error) {
+            console.error('削除エラー:', error);
+            alert('画像の削除に失敗しました。もう一度お試しください。');
+            showLoading(false);
+        }
     }
 }
 
+// 画像ダウンロード処理
 function downloadImage(url, filename) {
     if (!url) return;
     
@@ -113,4 +147,11 @@ function downloadImage(url, filename) {
             console.error('ダウンロードエラー:', error);
             alert('ダウンロードに失敗しました。もう一度お試しください。');
         });
+}
+
+// ローディングインジケーターの表示/非表示
+function showLoading(show) {
+    if (loadingIndicator) {
+        loadingIndicator.style.display = show ? 'block' : 'none';
+    }
 }
