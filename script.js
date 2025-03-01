@@ -2,9 +2,6 @@ const imageInput = document.getElementById('imageInput');
 const imageContainer = document.getElementById('imageContainer');
 const loadingIndicator = document.getElementById('loading');
 
-const CLOUD_NAME = 'dbcqnzlvc'; 
-const UPLOAD_PRESET = 'mentalsam';
-
 let images = [];
 
 // 初期ロード時に画像リストを取得
