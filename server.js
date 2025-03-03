@@ -46,6 +46,17 @@ app.get('/photos', (req, res) => {
     });
 });
 
+// 写真削除用のエンドポイント
+app.delete('/delete/:filename', (req, res) => {
+    const filePath = path.join(uploadDir, req.params.filename);
+    fs.unlink(filePath, (err) => {
+        if (err) {
+            return res.status(500).json({ success: false });
+        }
+        res.json({ success: true });
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
