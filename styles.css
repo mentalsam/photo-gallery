@@ -10,9 +10,20 @@ body {
     margin-top: 20px;
 }
 
-#gallery img {
-    max-width: 200px;
-    height: auto;
+.photo-item {
+    position: relative;
     border: 1px solid #ccc;
     border-radius: 5px;
+    padding: 10px;
+    width: 200px;
+}
+
+.photo-item img {
+    max-width: 100%;
+    height: auto;
+}
+
+.photo-item button {
+    margin-top: 5px;
+    width: 100%;
 }
