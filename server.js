@@ -7,7 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // アップロードされたファイルを保存するディレクトリ
-const uploadDir = path.join(__dirname, 'public', 'uploads');
+const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -25,7 +25,13 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // 静的ファイルの提供
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(__dirname));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// ルートへのアクセス
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 // 写真アップロード用のエンドポイント
 app.post('/upload', upload.single('photo'), (req, res) => {
@@ -43,17 +49,6 @@ app.get('/photos', (req, res) => {
             return res.status(500).json({ error: 'Unable to scan files' });
         }
         res.json(files);
-    });
-});
-
-// 写真削除用のエンドポイント
-app.delete('/delete/:filename', (req, res) => {
-    const filePath = path.join(uploadDir, req.params.filename);
-    fs.unlink(filePath, (err) => {
-        if (err) {
-            return res.status(500).json({ success: false });
-        }
-        res.json({ success: true });
     });
 });
 
